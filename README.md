@@ -1,86 +1,67 @@
-# Bili Hu Coffees BI Architecture
-BI system design consolidating Shopify, Excel, Tally ERP and IoT roaster logs into an Azure Synapse warehouse with SARIMA/Prophet demand forecasting and Power BI dashboards.
+# Enhancing SME Performance through BI: A System Design for Bili Hu Coffees LLP
 
-Engagement Summary
+A Business Intelligence system design built for a real client, Bili Hu Coffees LLP, a specialty
+coffee roaster based in Bengaluru, India, completed as part of my MSc Business Intelligence
+module at Brunel University London.
 
-Bili Hu Coffees LLP, a specialty coffee roaster headquartered in Bengaluru, operates across four disconnected systems — Shopify (retail), Excel (wholesale and inventory), Tally ERP (accounting), and IoT-enabled roasting equipment (production logs). Following a structured consultation with Managing Partner Vidyun R. Hebbar, I designed an end-to-end BI architecture to consolidate these sources, automate reporting, and introduce predictive demand planning — addressing the operational reconciliation burden, forecast inaccuracy, and lack of customer behavioural insight identified during discovery.
+## What this is
 
-This repository documents the architecture, data integration design, KPI framework, and predictive modelling approach proposed for the engagement.
+I interviewed the company's Managing Director, Vidyun Hebbar, to understand how the
+business actually operates day to day, then designed (not implemented) a BI system to
+address the specific problems he described, rather than working from a generic template.
+This is consulting analysis and system design, the recommendations have not been built or
+deployed by the company.
 
+## The company's actual problem
 
-Problem Statement
+Bili Hu runs Shopify for retail orders, Excel for wholesale and inventory, Tally ERP for
+accounting, and IoT-enabled roasting equipment that logs batch data nobody was analysing.
+None of these systems talk to each other. In Hebbar's own words, the team has to manually
+reconcile numbers because "our systems do not talk to each other," and forecasting is done
+in Excel in a way he described as "typically reactive."
 
-AreaIssue IdentifiedData IntegrationShopify, Excel, Tally ERP and IoT roaster logs operate in isolation — "our systems do not talk to each other." Manual reconciliation obscures real-time inventory visibility, particularly across overlapping wholesale/retail orders.Demand ForecastingForecasting is performed manually in Excel, producing inconsistent results, over/under-roasting, and delayed order fulfilment during peak demand.Customer AnalyticsShopify's native analytics cannot distinguish repeat vs. one-time purchasers or surface high-value customer segments — marketing decisions are made on intuition rather than data.Digital Behaviour TrackingAbsence of GA4 limits visibility into funnel performance, attribution, and the customer's digital journey — constraining subscription growth and geographic expansion plans.
+## What I designed
 
+- An **Azure Synapse data warehouse** as the single integrated environment, consolidating
+  Shopify, Excel, Tally ERP, IoT logs, and GA4 into one source of truth
+- An **automated ETL pipeline** (Azure Data Factory) to remove the manual reconciliation
+  that was costing the team hours per week
+- **OLAP cubes** for SKU-level, multi-dimensional analysis (the specific report Hebbar asked
+  for: comparing SKU performance over time and catching early product trends)
+- **Predictive models** (SARIMA, Prophet, regression) for demand forecasting, directly
+  targeting the over-roasting and waste caused by reactive, spreadsheet-based planning
+- **Customer segmentation** (RFM scoring, K-Means clustering) and **churn prediction** to
+  support the subscription retention goals Hebbar raised
+- **Power BI dashboards** and **GA4 integration** for ongoing decision support and digital
+  funnel analysis, which the business had no visibility into previously
 
-Proposed Architecture
+## Projected impact (KPI targets, 6–12 months post-implementation)
 
- Shopify   Excel   Tally ERP   IoT Roaster Logs   GA4
-    │         │         │              │            │
-    └─────────┴─────────┴──────────────┴────────────┘
-                          │
-                Azure Data Factory (ETL)
-                          │
-              Azure Synapse Data Warehouse
-                  (Star Schema, OLAP)
-                          │
-            ┌─────────────┴─────────────┐
-       Power BI Dashboards        Predictive Models
-   (Sales, Inventory, SKU,      (SARIMA / Prophet demand
-    Segmentation, IoT QC)        forecasting, churn, RFM)
+| Area | Target |
+|---|---|
+| Production forecast accuracy (MAPE) | Down 10–15% |
+| Roast quality variance | Down 20–25% |
+| SKU sell-through | Up 5–10% |
+| Customer lifetime value | Up 8–12% |
+| BI report generation time | Down from 3–5 hours to under 30 minutes |
+| Subscriber retention | Up 5–8% |
 
-See /diagrams for the full architecture, ETL pipeline flow, and star-schema ERD.
+## Implementation roadmap proposed
 
-Core components:
+1. Define KPIs, BI objectives, data sources, and governance
+2. Build ETL pipelines and the Azure Synapse star-schema warehouse
+3. Build forecasting, segmentation, and churn models; build OLAP cubes
+4. Deploy Power BI and GA4; deliver BI literacy training to staff
 
+## A note on scope and use of AI
 
-Data Integration: Azure Data Factory pipelines connecting Shopify, Tally ERP, and IoT roaster logs into a single warehouse, removing manual reconciliation.
-Warehouse & OLAP: Azure Synapse star-schema warehouse enabling drill-down/roll-up analysis across SKU, time, and customer dimensions.
-Predictive Layer: SARIMA and Prophet time-series models for production demand forecasting; k-Means/RFM segmentation for customer retention; churn prediction for the subscription base.
-Behavioural Analytics: GA4 integration for funnel analysis, attribution modelling, and CAC tracking.
-Reporting Layer: Power BI dashboards replacing manual spreadsheet reporting (target: report generation time reduced from 3–5 hours to under 30 minutes).
+This was graded coursework (MG5601, Brunel University London). Generative AI (ChatGPT)
+was used for idea generation and outline structuring only, consistent with the university's
+academic guidance on AI use; all analysis and writing are my own. This is a system design
+exercise based on a real client interview, not an implemented or deployed solution.
 
+## About
 
-
-KPI Framework
-
-CategoryMetricBaselineTarget (6–12 mo)MechanismForecast AccuracyProduction Forecast (MAPE)Manual, high volatility↓ 10–15%SARIMA / ProphetQuality ControlRoast Profile Variance (IoT)No monitoring↓ 20–25%IoT analyticsStock PerformanceSKU Sell-Through RateManual checks↑ 5–10%OLAP + ClusteringCustomer BehaviourCustomer Lifetime ValueSpreadsheet-based↑ 8–12%Segmentation & retention modelsAcquisition EfficiencyCACManual ad tracking↓ 10–15%GA4 funnel insightsSubscription HealthActive Subscriber RetentionUntracked↑ 5–8%Churn predictionReporting EfficiencyDashboard Generation Time3–5 hrs (manual)< 30 minETL automation
-
-Full KPI tracker with logic and definitions: /kpi-framework
-
-
-Repository Structure
-
-├── docs/                 → Full written report + architecture notes
-├── diagrams/             → BI architecture, ETL flow, star-schema ERD
-├── dashboards/           → Power BI mockups (illustrative / synthetic data)
-├── kpi-framework/        → KPI tracker spreadsheet
-└── models/               → SARIMA/Prophet forecasting demo notebook
-
-
-Implementation Roadmap
-
-
-Phase 1 — Foundation: Define KPIs, BI objectives, data sources, and governance.
-Phase 2 — Integration: Build ADF ETL pipelines into an Azure Synapse star-schema warehouse.
-Phase 3 — Modelling: Develop forecasting, segmentation, churn, and association-rule models; build OLAP cubes.
-Phase 4 — Deployment: Roll out Power BI dashboards and GA4, deliver BI literacy training to stakeholders.
-
-
-
-Disclosure & Integrity
-
-
-This case study originates from postgraduate coursework (MG5601, Brunel Business School) based on a real consultation with Bili Hu Coffees LLP's Managing Partner. Company details are disclosed with the founder's knowledge for academic verification.
-Financial and operational figures reflect targets and ranges discussed during consultation, not audited client data.
-Dashboard visuals in this repository use illustrative or synthetic data and are not connected to Bili Hu's live systems.
-Generative AI was used for outline structuring and section-heading refinement only; all analysis and writing are original. Full acknowledgment retained in /docs/full-report.pdf.
-
-
-
-Author
-
-Mark Maxwel Louis
-Technology Risk Consultant | MSc Accounting & Business Intelligence (Distinction), Brunel University London
-SQL · Power BI · DAX · Python (Pandas) · Azure Synapse/ADF
-
+Built by [Mark Maxwel Louis](https://www.linkedin.com/in/markmaxwellouis), MSc Accounting
+& Business Intelligence (Distinction), Brunel University London, for a real consulting
+engagement with Bili Hu Coffees LLP ([bilihucoffee.com](https://bilihucoffee.com)).
